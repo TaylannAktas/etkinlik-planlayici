@@ -31,6 +31,21 @@ const DERSLER = [
   ['MATH276', 'Diferansiyel Denklemler'],
   ['EE209', 'Devre Analizi I'],
   ['EE213', 'Olasılık ve Rastgele Süreçler'],
+  // 3. sınıf (5. yarıyıl) — staj (x99) ve alan seçmeli hariç
+  ['CMPE323', 'Algoritma'],
+  ['CMPE331', 'Bilgisayar Mimarisi ve Örgütleşimi'],
+  ['CMPE325', 'Programlama Dilleri'],
+  ['CMPE341', 'Veritabanı Tasarım ve Yönetimi'],
+  ['FE301', 'İş Sağlığı ve Güvenliği'],
+  ['FE302', 'Mühendislik Mesleğinin İlkeleri'],
+  ['EE303', 'Sinyaller ve Sistemler'],
+  ['EE313', 'Elektronik Devreler II'],
+  ['EE321', 'Elektromanyetik Teorisi II'],
+  ['EE353', 'Elektromekanik Enerji Dönüşümü I'],
+  ['SE321', 'Nesneye Dayalı Analiz ve Tasarım'],
+  ['SE345', 'Yazılım Kalite Güvencesi'],
+  ['ISE311', 'İnternet Programlama'],
+  ['ISE353', 'Bilgi Sistemleri Geliştirilmesi'],
 ];
 // Listede olup sınav programında bulunamayan dersler (sitede bilgi olarak gösterilir)
 const BULUNAMAYAN = ['Kariyer Planlama', 'Üniversite Hayatına Giriş'];
