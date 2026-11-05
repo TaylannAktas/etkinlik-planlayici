@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Etkinlik Planlayıcı</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="mode-switch">
+      <button class="mode active" data-mode="ders">Ders Programı</button>
+      <button class="mode" data-mode="sinav">Sınav Programı</button>
+    </div>
+    <h1>Etkinlik Planlayıcı</h1>
+  </header>
+
+  <main id="ders-mode" class="layout">
+    <aside class="sidebar">
+      <h2>Ders programları</h2>
+      <ul id="program-list"></ul>
+      <p id="empty-programs" class="muted">Henüz ders programı yok.</p>
+      <button id="add-program" class="btn primary">+ Ders programı ekle</button>
+    </aside>
+
+    <section class="content">
+      <div class="month-head">
+        <button id="prev-month" class="btn icon" aria-label="Önceki ay">‹</button>
+        <h2 id="month-title"></h2>
+        <button id="next-month" class="btn icon" aria-label="Sonraki ay">›</button>
+        <button id="today" class="btn">Bugün</button>
+      </div>
+      <div id="month-grid" class="month-grid"></div>
+      <div class="day-view">
+        <h3 id="day-title"></h3>
+        <p id="day-empty" class="muted" hidden>Bu gün için ders yok.</p>
+        <div id="day-grid" class="day-grid"></div>
+      </div>
+    </section>
+  </main>
+
+  <main id="sinav-mode" class="placeholder" hidden>
+    <p>Sınav programı modu yakında.</p>
+  </main>
+
+  <div id="editor" class="overlay" hidden>
+    <div class="editor">
+      <div class="editor-head">
+        <input id="program-name" placeholder="Program adı (ör. Bilgisayar Müh. 2. sınıf)">
+        <input id="program-color" type="color" title="Program rengi">
+        <span class="spacer"></span>
+        <button id="delete-program" class="btn danger">Programı sil</button>
+        <button id="cancel-edit" class="btn">Vazgeç</button>
+        <button id="save-program" class="btn primary">Kaydet</button>
+      </div>
+      <p class="muted hint">Bir gün sütununda saatleri sürükleyerek seç, sonra ders adını yaz. Var olan bir derse tıklayarak düzenleyebilir ya da silebilirsin.</p>
+      <div class="editor-body">
+        <div id="week-grid" class="week-grid"></div>
+        <form id="entry-form" class="entry-form" hidden>
+          <strong id="entry-range"></strong>
+          <label>Ders adı<input id="entry-name" required></label>
+          <label>Derslik (isteğe bağlı)<input id="entry-room"></label>
+          <div class="row">
+            <button type="submit" id="entry-submit" class="btn primary">Ekle</button>
+            <button type="button" id="entry-delete" class="btn danger">Sil</button>
+            <button type="button" id="entry-cancel" class="btn">İptal</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
