@@ -37,6 +37,8 @@ ve http://localhost:8000 adresine git.
 
   Dersler slot numarasıyla kaydedildiği için `FIRST_SLOT` değiştirilirse kayıtlı programlar da kayar.
 
+- **Hazır programlar** `programlar.js` dosyasında durur (şu an: CMPE 1 Reg.). Siteyi ilk açan herkese bir kez eklenir; kullanıcı sonradan düzenleyip silebilir, silinen geri gelmez. Yeni hazır program eklemek için dosyadaki örneği kopyalayıp benzersiz bir `id` vermek yeterli.
+
 ## Yayın
 
 Site GitHub Pages'te yayında: https://taylannaktas.github.io/etkinlik-planlayici/ — `main` dalına her push'ta otomatik güncellenir.

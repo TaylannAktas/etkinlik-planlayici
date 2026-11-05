@@ -9,6 +9,7 @@ const MONTHS = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz'
 const PALETTE = ['#2563eb', '#16a34a', '#dc2626', '#9333ea', '#ea580c', '#0891b2', '#ca8a04', '#db2777'];
 const STORE_KEY = 'ep.programs';
 const SEL_KEY = 'ep.selected';
+const SEEN_KEY = 'ep.hazirEklenen'; // eklenmiş hazır programların id'leri
 const MAX_CHIPS = 3;
 const MAX_DOTS = 6;
 const SHORT_DAYS = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum'];
@@ -24,6 +25,7 @@ const fmt = (min) => `${pad(Math.floor(min / 60))}:${pad(min % 60)}`;
 const slotStart = (i) => fmt(FIRST_SLOT.h * 60 + FIRST_SLOT.m + i * 60);
 const slotEnd = (i) => fmt(FIRST_SLOT.h * 60 + FIRST_SLOT.m + i * 60 + SLOT_MINUTES);
 const rangeText = (e) => `${slotStart(e.start)}–${slotEnd(e.end - 1)}`;
+const info = (...parts) => parts.filter(Boolean).join(' · ');
 const weekdayIndex = (d) => (d.getDay() + 6) % 7; // Pazartesi = 0
 const sameDay = (a, b) => a.toDateString() === b.toDateString();
 
@@ -34,9 +36,42 @@ function store(key, value) {
   try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* depolama kapalıysa sessizce geç */ }
 }
 
-// Program: { id, name, color, entries: [{ id, day (0-4), start, end (slot, end hariç), name, room }] }
+// Program: { id, name, color, entries: [{ id, day (0-4), start, end (slot, end hariç), name, room, teacher }] }
 let programs = load(STORE_KEY, []);
 let selected = new Set(load(SEL_KEY, programs.map((p) => p.id)));
+
+// programlar.js'deki hazır programları her tarayıcıya bir kez ekle
+const seen = new Set(load(SEEN_KEY, []));
+for (const p of window.HAZIR_PROGRAMLAR || []) {
+  if (seen.has(p.id)) continue;
+  if (!programs.some((x) => x.id === p.id)) {
+    programs.push({ ...p, entries: p.entries.map((e) => ({ ...e, id: uid() })) });
+    selected.add(p.id);
+  }
+  seen.add(p.id);
+}
+store(STORE_KEY, programs);
+store(SEL_KEY, [...selected]);
+store(SEEN_KEY, [...seen]);
+
+// Aynı saatlere düşen dersleri yan yana şeritlere yerleştirir: Map(ders → { lane, n })
+function layoutLanes(list) {
+  const pos = new Map();
+  const sorted = [...list].sort((a, b) => a.start - b.start || a.end - b.end);
+  let cluster = [], ends = [], clusterEnd = -1;
+  const flush = () => { for (const e of cluster) pos.get(e).n = ends.length; cluster = []; ends = []; };
+  for (const e of sorted) {
+    if (e.start >= clusterEnd) flush();
+    let lane = ends.findIndex((end) => end <= e.start);
+    if (lane < 0) { lane = ends.length; ends.push(0); }
+    ends[lane] = e.end;
+    pos.set(e, { lane, n: 1 });
+    cluster.push(e);
+    clusterEnd = Math.max(clusterEnd, e.end);
+  }
+  flush();
+  return pos;
+}
 let viewMonth = startOfMonth(new Date());
 let selectedDay = nearestWeekday(new Date());
 
@@ -113,7 +148,7 @@ function renderMonth() {
         chip.className = 'chip';
         chip.style.setProperty('--c', e.program.color);
         chip.textContent = `${slotStart(e.start)} ${e.name}`;
-        chip.title = `${e.name} · ${rangeText(e)}${e.room ? ' · ' + e.room : ''} · ${e.program.name}`;
+        chip.title = info(e.name, rangeText(e), e.room, e.teacher, e.program.name);
         cell.append(chip);
       }
       if (evs.length > MAX_CHIPS) cell.insertAdjacentHTML('beforeend', `<span class="more">+${evs.length - MAX_CHIPS} daha</span>`);
@@ -147,16 +182,7 @@ function renderDay() {
   const evs = eventsFor(selectedDay);
   $('day-empty').hidden = evs.length > 0;
 
-  // Çakışan dersleri yan yana şeritlere yerleştir
-  const laneEnds = [];
-  for (const e of evs) {
-    let lane = laneEnds.findIndex((end) => end <= e.start);
-    if (lane < 0) { lane = laneEnds.length; laneEnds.push(0); }
-    laneEnds[lane] = e.end;
-    e.lane = lane;
-  }
-  const lanes = Math.max(1, laneEnds.length);
-
+  const pos = layoutLanes(evs);
   const track = document.createElement('div');
   track.className = 'track';
   track.style.gridRow = `1 / ${SLOT_COUNT + 1}`;
@@ -166,11 +192,13 @@ function renderDay() {
     b.style.setProperty('--c', e.program.color);
     b.style.top = `calc(${e.start} * var(--row))`;
     b.style.height = `calc(${e.end - e.start} * var(--row) - 4px)`;
-    b.style.left = `${(e.lane * 100) / lanes}%`;
-    b.style.width = `calc(${100 / lanes}% - 4px)`;
+    const { lane, n } = pos.get(e);
+    b.style.left = `${(lane * 100) / n}%`;
+    b.style.width = `calc(${100 / n}% - 4px)`;
     b.innerHTML = '<strong></strong><span></span>';
     b.querySelector('strong').textContent = e.name;
-    b.querySelector('span').textContent = `${rangeText(e)}${e.room ? ' · ' + e.room : ''} · ${e.program.name}`;
+    b.querySelector('span').textContent = info(rangeText(e), e.room, e.teacher, e.program.name);
+    b.title = info(e.name, rangeText(e), e.room, e.teacher, e.program.name);
     track.append(b);
   }
   g.append(track);
@@ -183,7 +211,7 @@ function renderDay() {
     li.style.setProperty('--c', e.program.color);
     li.innerHTML = `<span class="t">${slotStart(e.start)}<br>${slotEnd(e.end - 1)}</span><div><strong></strong><span></span></div>`;
     li.querySelector('strong').textContent = e.name;
-    li.querySelector('div span').textContent = `${e.room ? e.room + ' · ' : ''}${e.program.name}`;
+    li.querySelector('div span').textContent = info(e.room, e.teacher, e.program.name);
     list.append(li);
   }
 }
@@ -257,17 +285,26 @@ function renderWeek() {
       g.insertAdjacentHTML('beforeend', `<div class="cell" data-day="${d}" data-slot="${s}" style="grid-row:${s + 2};grid-column:${col(d)}"></div>`);
     }
   }
+  const pos = new Map();
+  for (const d of days) layoutLanes(draft.entries.filter((e) => e.day === d)).forEach((v, k) => pos.set(k, v));
   for (const e of draft.entries) {
     if (!days.includes(e.day)) continue;
     const b = document.createElement('div');
     b.className = 'block';
     b.classList.toggle('editing', editingEntry === e);
     b.style.gridColumn = col(e.day);
+    const { lane, n } = pos.get(e);
+    if (n > 1) { // çakışan şubeler yan yana
+      b.style.justifySelf = 'start';
+      b.style.width = `calc(${100 / n}% - 4px)`;
+      b.style.marginLeft = `calc(${(lane * 100) / n}% + 2px)`;
+    }
+    b.title = info(e.name, rangeText(e), e.room, e.teacher);
     b.style.gridRow = `${e.start + 2} / ${e.end + 2}`;
     b.style.setProperty('--c', draft.color);
     b.innerHTML = '<strong></strong><span></span>';
     b.querySelector('strong').textContent = e.name;
-    b.querySelector('span').textContent = `${rangeText(e)}${e.room ? ' · ' + e.room : ''}`;
+    b.querySelector('span').textContent = info(rangeText(e), e.room, e.teacher);
     b.onclick = () => { tapStart = null; openEntryForm(e); };
     g.append(b);
   }
@@ -301,6 +338,7 @@ function openEntryForm(entry) {
   $('entry-range').textContent = `${DAYS[r.day]} ${rangeText(r)}`;
   $('entry-name').value = entry?.name ?? '';
   $('entry-room').value = entry?.room ?? '';
+  $('entry-teacher').value = entry?.teacher ?? '';
   $('entry-submit').textContent = entry ? 'Güncelle' : 'Ekle';
   $('entry-delete').hidden = !entry;
   $('entry-form').hidden = false;
@@ -441,8 +479,9 @@ $('entry-form').onsubmit = (e) => {
   const name = $('entry-name').value.trim();
   if (!name) return;
   const room = $('entry-room').value.trim();
-  if (editingEntry) Object.assign(editingEntry, { name, room });
-  else draft.entries.push({ id: uid(), day: sel.day, start: sel.a, end: sel.b + 1, name, room });
+  const teacher = $('entry-teacher').value.trim();
+  if (editingEntry) Object.assign(editingEntry, { name, room, teacher });
+  else draft.entries.push({ id: uid(), day: sel.day, start: sel.a, end: sel.b + 1, name, room, teacher });
   closeEntryForm();
 };
 $('entry-cancel').onclick = closeEntryForm;
