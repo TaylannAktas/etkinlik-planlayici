@@ -52,6 +52,7 @@
         <button id="ex-none" class="btn small">Temizle</button>
       </div>
       <ul id="exam-course-list" class="item-list"></ul>
+      <button id="add-exam" class="btn primary"><span class="long">+ Sınav ekle</span><span class="short">+ Sınav</span></button>
     </aside>
 
     <section class="content">
@@ -98,6 +99,26 @@
         </form>
       </div>
     </div>
+  </div>
+
+  <div id="exam-editor" class="overlay" hidden>
+    <form id="exam-form" class="exam-form">
+      <h3 id="xf-title">Sınav ekle</h3>
+      <label>Ders kodu<input id="xf-code" required placeholder="ör. CMPE113"></label>
+      <label>Ders adı (isteğe bağlı)<input id="xf-course"></label>
+      <label>Tarih<input id="xf-date" type="date" required></label>
+      <div class="row nowrap">
+        <label>Başlangıç<input id="xf-start" type="time"></label>
+        <label>Bitiş<input id="xf-end" type="time"></label>
+      </div>
+      <label>Derslik (isteğe bağlı)<input id="xf-room"></label>
+      <p id="xf-error" class="muted warn" hidden></p>
+      <div class="row">
+        <button type="submit" class="btn primary">Kaydet</button>
+        <button type="button" id="xf-delete" class="btn danger">Sil</button>
+        <button type="button" id="xf-cancel" class="btn">Vazgeç</button>
+      </div>
+    </form>
   </div>
 
   <script src="programlar.js"></script>

@@ -531,13 +531,26 @@ document.addEventListener('keydown', (e) => {
 
 // ================= Sınav programı modu =================
 // Veri sinavlar.js'den gelir (araclar/sinavlari-guncelle.js ile üretilir).
-const EXAMS = window.SINAVLAR || [];
-const EXAM_COURSES = window.SINAV_DERSLER || [];
+// Kullanıcının elle eklediği sınavlar ayrıca localStorage'da (ep.sinavlarim) tutulur.
+const OWN_EXAMS_KEY = 'ep.sinavlarim';
 const EXAM_RED = '#ff1f3d'; // bütün sınavlar parlak kırmızı
 const isoDate = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 const fromIso = (s) => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
-const examTime = (e) => (e.start ? `${e.start}–${e.end}` : 'Saat belirtilmemiş');
-const EXAM_COLS = EXAMS.some((e) => fromIso(e.date).getDay() === 0) ? 7 : 6; // pazar sınavı yoksa Pzt–Cmt
+const examTime = (e) => (e.start && e.end ? `${e.start}–${e.end}` : e.start || 'Saat belirtilmemiş');
+
+let ownExams = load(OWN_EXAMS_KEY, []);
+let EXAMS = [];
+let EXAM_COURSES = [];
+let EXAM_COLS = 6;
+function rebuildExams() {
+  EXAMS = [...(window.SINAVLAR || []), ...ownExams]
+    .sort((a, b) => (a.date + (a.start || '')).localeCompare(b.date + (b.start || '')));
+  EXAM_COURSES = [...(window.SINAV_DERSLER || [])];
+  const known = new Set(EXAM_COURSES.map(([c]) => c));
+  for (const e of ownExams) if (!known.has(e.code)) { known.add(e.code); EXAM_COURSES.push([e.code, e.course]); }
+  EXAM_COLS = EXAMS.some((e) => fromIso(e.date).getDay() === 0) ? 7 : 6; // pazar sınavı yoksa Pzt–Cmt
+}
+rebuildExams();
 
 let hiddenCourses = new Set(load(EXAM_HIDDEN_KEY, []));
 let exViewMonth = startOfMonth(new Date());
@@ -596,14 +609,21 @@ function examItem(e) {
   li.className = 'exam';
   li.style.setProperty('--c', EXAM_RED);
   li.innerHTML = '<span class="t"></span><div><strong></strong><span class="sub"></span></div>';
-  li.querySelector('.t').innerHTML = e.start ? `${e.start}<br>${e.end}` : 'Saat<br>yok';
+  li.querySelector('.t').innerHTML = e.start ? `${e.start}<br>${e.end || ''}` : 'Saat<br>yok';
   li.querySelector('strong').textContent = e.course;
-  li.querySelector('.sub').textContent = info(e.code, e.title, e.sections && `Şube ${e.sections}`);
+  li.querySelector('.sub').textContent = info(e.code !== e.course && e.code, e.title, e.sections && `Şube ${e.sections}`, e.own && 'Elle eklendi');
   const div = li.querySelector('div');
-  for (const r of e.rooms) {
+  for (const r of e.rooms || []) {
     const line = document.createElement('span');
     line.textContent = e.rooms.length > 1 && r.sections ? `Şube ${r.sections}: ${r.rooms}` : `Derslik: ${r.rooms}`;
     div.append(line);
+  }
+  if (e.own) {
+    const b = document.createElement('button');
+    b.className = 'btn small edit';
+    b.textContent = 'Düzenle';
+    b.onclick = () => openExamForm(e);
+    li.append(b);
   }
   return li;
 }
@@ -653,6 +673,66 @@ $('ex-prev').onclick = () => shiftExamMonth(-1);
 $('ex-next').onclick = () => shiftExamMonth(1);
 $('ex-today').onclick = () => { exViewMonth = startOfMonth(new Date()); exSelectedDay = new Date(new Date().setHours(0, 0, 0, 0)); renderExams(); };
 onSwipe($('ex-month-grid'), shiftExamMonth);
+
+// ---- Elle sınav ekleme / düzenleme ----
+let editingExam = null; // düzenlenen sınav; yeni sınavda null
+let examDeleteArmed = false;
+function openExamForm(exam) {
+  editingExam = exam || null;
+  examDeleteArmed = false;
+  $('xf-title').textContent = exam ? 'Sınavı düzenle' : 'Sınav ekle';
+  $('xf-code').value = exam ? exam.code : '';
+  $('xf-course').value = exam && exam.course !== exam.code ? exam.course : '';
+  $('xf-date').value = exam ? exam.date : isoDate(exSelectedDay);
+  $('xf-start').value = exam ? exam.start || '' : '';
+  $('xf-end').value = exam ? exam.end || '' : '';
+  $('xf-room').value = exam ? exam.room || '' : '';
+  $('xf-delete').hidden = !exam;
+  $('xf-delete').textContent = 'Sil';
+  $('xf-error').hidden = true;
+  $('exam-editor').hidden = false;
+  $('xf-code').focus();
+}
+const closeExamForm = () => { $('exam-editor').hidden = true; editingExam = null; };
+
+function afterExamChange(date) {
+  store(OWN_EXAMS_KEY, ownExams);
+  rebuildExams();
+  if (date) { exSelectedDay = fromIso(date); exViewMonth = startOfMonth(exSelectedDay); }
+  while (weekdayIndex(exSelectedDay) >= EXAM_COLS) exSelectedDay.setDate(exSelectedDay.getDate() + 1);
+  closeExamForm();
+  renderExamSidebar();
+  renderAll();
+}
+
+$('exam-form').onsubmit = (ev) => {
+  ev.preventDefault();
+  const code = $('xf-code').value.toUpperCase().replace(/\s+/g, '');
+  const course = $('xf-course').value.trim() || code;
+  const date = $('xf-date').value;
+  const start = $('xf-start').value;
+  const end = $('xf-end').value;
+  const room = $('xf-room').value.trim();
+  const err = !code ? 'Ders kodu gerekli.' : !date ? 'Tarih gerekli.'
+    : end && !start ? 'Bitiş saati için başlangıç saati de girilmeli.'
+    : start && end && end <= start ? 'Bitiş saati başlangıçtan sonra olmalı.' : '';
+  if (err) { $('xf-error').textContent = err; $('xf-error').hidden = false; return; }
+  const exam = { id: editingExam ? editingExam.id : `own-${Date.now()}`, own: true, code, course, title: '', date, start, end, room, rooms: room ? [{ rooms: room }] : [] };
+  ownExams = editingExam ? ownExams.map((e) => (e.id === exam.id ? exam : e)) : [...ownExams, exam];
+  hiddenCourses.delete(code); // yeni eklenen sınav gizli kalmasın
+  store(EXAM_HIDDEN_KEY, [...hiddenCourses]);
+  afterExamChange(date);
+};
+$('xf-delete').onclick = () => {
+  if (!examDeleteArmed) { examDeleteArmed = true; $('xf-delete').textContent = 'Emin misin? Tekrar bas'; return; }
+  const id = editingExam.id;
+  ownExams = ownExams.filter((e) => e.id !== id);
+  afterExamChange(null);
+};
+$('xf-cancel').onclick = closeExamForm;
+$('exam-editor').onclick = (ev) => { if (ev.target.id === 'exam-editor') closeExamForm(); };
+document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && !$('exam-editor').hidden) closeExamForm(); });
+$('add-exam').onclick = () => openExamForm(null);
 
 const missing = window.SINAV_BULUNAMAYAN || [];
 $('ex-source').innerHTML = '';
