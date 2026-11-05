@@ -37,7 +37,7 @@ ve http://localhost:8000 adresine git.
 
   Dersler slot numarasıyla kaydedildiği için `FIRST_SLOT` değiştirilirse kayıtlı programlar da kayar.
 
-- **Hazır programlar** `programlar.js` dosyasında durur (şu an: CMPE 1 Reg.). Siteyi ilk açan herkese bir kez eklenir; kullanıcı sonradan düzenleyip silebilir, silinen geri gelmez. Yeni hazır program eklemek için dosyadaki örneği kopyalayıp benzersiz bir `id` vermek yeterli.
+- **Hazır programlar** `programlar.js` dosyasında durur (şu an: CMPE 1 Reg., CMPE 2 Reg., EE 1 Reg., EE 2 Reg.). Siteyi ilk açan herkese bir kez eklenir; kullanıcı sonradan düzenleyip silebilir, silinen geri gelmez. Yeni hazır program eklemek için dosyadaki örneği kopyalayıp benzersiz bir `id` vermek yeterli.
 
 ## Yayın
 
