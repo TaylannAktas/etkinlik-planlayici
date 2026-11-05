@@ -12,6 +12,9 @@
       <button class="mode active" data-mode="ders">Ders Programı</button>
       <button class="mode" data-mode="sinav">Sınav Programı</button>
     </div>
+    <button id="overlay-toggle" class="btn overlay-btn" aria-pressed="false" title="Ders ve sınav programını aynı takvimde göster">
+      <span class="long">Üst üste göster</span><span class="short">Üst üste</span>
+    </button>
     <h1>Etkinlik Planlayıcı</h1>
   </header>
 
@@ -34,6 +37,7 @@
       <div class="day-view">
         <h3 id="day-title"></h3>
         <p id="day-empty" class="muted" hidden>Bu gün için ders yok.</p>
+        <ul id="day-exams" class="day-list always day-exams"></ul>
         <div id="day-grid" class="day-grid"></div>
         <ul id="day-list" class="day-list"></ul>
       </div>

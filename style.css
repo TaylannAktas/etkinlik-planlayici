@@ -133,6 +133,14 @@ body {
 .tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 .tab small { margin-left: 4px; font-size: 10px; opacity: .8; }
 
+/* Sınavlar: parlak kırmızı, takvimde belirgin */
+.chip.exam { font-weight: 600; color: #fff; background: var(--c); }
+.day-list li.exam { background: color-mix(in srgb, var(--c) 16%, var(--panel)); }
+.day-list li.exam strong { color: var(--c); }
+.day-exams:not(:empty) { margin-bottom: 10px; }
+.overlay-btn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.overlay-btn[aria-pressed="true"]::before { content: "✓ "; }
+
 /* Sınav modu */
 .day-list.always { display: flex; }
 .day-list li:has(.sub) { align-items: flex-start; }
