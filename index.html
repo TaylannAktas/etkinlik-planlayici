@@ -20,7 +20,7 @@
       <h2>Ders programları</h2>
       <ul id="program-list"></ul>
       <p id="empty-programs" class="muted">Henüz ders programı yok.</p>
-      <button id="add-program" class="btn primary">+ Ders programı ekle</button>
+      <button id="add-program" class="btn primary"><span class="long">+ Ders programı ekle</span><span class="short">+ Ekle</span></button>
     </aside>
 
     <section class="content">
@@ -35,6 +35,7 @@
         <h3 id="day-title"></h3>
         <p id="day-empty" class="muted" hidden>Bu gün için ders yok.</p>
         <div id="day-grid" class="day-grid"></div>
+        <ul id="day-list" class="day-list"></ul>
       </div>
     </section>
   </main>
@@ -53,7 +54,8 @@
         <button id="cancel-edit" class="btn">Vazgeç</button>
         <button id="save-program" class="btn primary">Kaydet</button>
       </div>
-      <p class="muted hint">Bir gün sütununda saatleri sürükleyerek seç, sonra ders adını yaz. Var olan bir derse tıklayarak düzenleyebilir ya da silebilirsin.</p>
+      <div id="day-tabs" class="day-tabs"></div>
+      <p id="hint" class="muted hint"></p>
       <div class="editor-body">
         <div id="week-grid" class="week-grid"></div>
         <form id="entry-form" class="entry-form" hidden>

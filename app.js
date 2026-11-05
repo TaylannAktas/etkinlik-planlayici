@@ -10,6 +10,12 @@ const PALETTE = ['#2563eb', '#16a34a', '#dc2626', '#9333ea', '#ea580c', '#0891b2
 const STORE_KEY = 'ep.programs';
 const SEL_KEY = 'ep.selected';
 const MAX_CHIPS = 3;
+const MAX_DOTS = 6;
+const SHORT_DAYS = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum'];
+const mobileQuery = window.matchMedia('(max-width: 760px)');
+const isMobile = () => mobileQuery.matches;
+const HINT_DESKTOP = 'Bir gün sütununda saatleri sürükleyerek seç, sonra ders adını yaz. Var olan bir derse tıklayarak düzenleyebilir ya da silebilirsin.';
+const HINT_MOBILE = 'Dersin başladığı saate, sonra bittiği saate dokun. Tek saatlik ders için aynı saate iki kez dokun. Var olan derse dokunarak düzenleyebilirsin.';
 
 const $ = (id) => document.getElementById(id);
 const pad = (n) => String(n).padStart(2, '0');
@@ -60,7 +66,8 @@ function renderSidebar() {
   for (const p of programs) {
     const li = document.createElement('li');
     li.className = 'program-item';
-    li.innerHTML = '<label><input type="checkbox"><span class="swatch"></span><span class="pname"></span></label><button class="btn small">Düzenle</button>';
+    li.style.setProperty('--c', p.color);
+    li.innerHTML = '<label><input type="checkbox"><span class="swatch"></span><span class="pname"></span></label><button class="btn small" aria-label="Düzenle"><span class="long">Düzenle</span><span class="short">✎</span></button>';
     const cb = li.querySelector('input');
     cb.checked = selected.has(p.id);
     cb.onchange = () => {
@@ -81,7 +88,7 @@ function renderMonth() {
   $('month-title').textContent = `${MONTHS[viewMonth.getMonth()]} ${viewMonth.getFullYear()}`;
   const grid = $('month-grid');
   grid.innerHTML = '';
-  for (const d of DAYS) grid.insertAdjacentHTML('beforeend', `<div class="dow">${d}</div>`);
+  DAYS.forEach((d, i) => grid.insertAdjacentHTML('beforeend', `<div class="dow"><span class="long">${d}</span><span class="short">${SHORT_DAYS[i]}</span></div>`));
 
   const start = new Date(viewMonth);
   start.setDate(1 - weekdayIndex(viewMonth));
@@ -110,6 +117,16 @@ function renderMonth() {
         cell.append(chip);
       }
       if (evs.length > MAX_CHIPS) cell.insertAdjacentHTML('beforeend', `<span class="more">+${evs.length - MAX_CHIPS} daha</span>`);
+      if (evs.length) { // telefonda etiket yerine renkli noktalar
+        const dots = document.createElement('span');
+        dots.className = 'dots';
+        for (const e of evs.slice(0, MAX_DOTS)) {
+          const dot = document.createElement('i');
+          dot.style.background = e.program.color;
+          dots.append(dot);
+        }
+        cell.append(dots);
+      }
 
       cell.onclick = () => { selectedDay = day; renderCalendar(); };
       grid.append(cell);
@@ -157,6 +174,18 @@ function renderDay() {
     track.append(b);
   }
   g.append(track);
+
+  // Telefon için liste görünümü
+  const list = $('day-list');
+  list.innerHTML = '';
+  for (const e of evs) {
+    const li = document.createElement('li');
+    li.style.setProperty('--c', e.program.color);
+    li.innerHTML = `<span class="t">${slotStart(e.start)}<br>${slotEnd(e.end - 1)}</span><div><strong></strong><span></span></div>`;
+    li.querySelector('strong').textContent = e.name;
+    li.querySelector('div span').textContent = `${e.room ? e.room + ' · ' : ''}${e.program.name}`;
+    list.append(li);
+  }
 }
 
 function renderCalendar() { renderMonth(); renderDay(); }
@@ -167,9 +196,36 @@ let isNew = false;
 let sel = null;          // { day, a, b } seçili hücre aralığı
 let editingEntry = null; // tıklanıp düzenlenen ders
 let dragging = false;
+let editDay = 0;         // telefonda düzenleyicide gösterilen gün
+let tapStart = null;     // telefonda ilk dokunulan saat { day, s }
+let lastPointer = 'mouse';
+
+function setHint(warning) {
+  const h = $('hint');
+  h.classList.toggle('warn', !!warning);
+  if (warning) h.textContent = warning;
+  else if (tapStart) h.textContent = `Başlangıç ${slotStart(tapStart.s)}. Şimdi dersin bittiği saate dokun.`;
+  else h.textContent = isMobile() ? HINT_MOBILE : HINT_DESKTOP;
+}
+
+function renderDayTabs() {
+  const tabs = $('day-tabs');
+  tabs.innerHTML = '';
+  DAYS.forEach((d, i) => {
+    const b = document.createElement('button');
+    b.className = 'tab';
+    b.classList.toggle('active', i === editDay);
+    const count = draft.entries.filter((e) => e.day === i).length;
+    b.innerHTML = `${SHORT_DAYS[i]}${count ? `<small>${count}</small>` : ''}`;
+    b.onclick = () => { editDay = i; tapStart = null; closeEntryForm(); };
+    tabs.append(b);
+  });
+}
 
 function openEditor(p) {
   isNew = !p;
+  editDay = Math.min(weekdayIndex(selectedDay), 4);
+  tapStart = null;
   draft = p ? structuredClone(p) : { id: uid(), name: '', color: PALETTE[programs.length % PALETTE.length], entries: [] };
   $('program-name').value = draft.name;
   $('program-name').classList.remove('invalid');
@@ -187,30 +243,37 @@ function closeEditor() {
 }
 
 function renderWeek() {
+  const single = isMobile(); // telefonda tek gün sütunu
+  const days = single ? [editDay] : [0, 1, 2, 3, 4];
+  const col = (d) => (single ? 2 : d + 2);
   const g = $('week-grid');
   g.innerHTML = '<div></div>';
+  g.classList.toggle('single', single);
   g.style.setProperty('--slots', SLOT_COUNT);
-  DAYS.forEach((d, i) => g.insertAdjacentHTML('beforeend', `<div class="wh" style="grid-column:${i + 2}">${d}</div>`));
+  if (!single) DAYS.forEach((d, i) => g.insertAdjacentHTML('beforeend', `<div class="wh" style="grid-column:${i + 2}">${d}</div>`));
   for (let s = 0; s < SLOT_COUNT; s++) {
     g.insertAdjacentHTML('beforeend', `<div class="time" style="grid-row:${s + 2}">${slotStart(s)}</div>`);
-    for (let d = 0; d < 5; d++) {
-      g.insertAdjacentHTML('beforeend', `<div class="cell" data-day="${d}" data-slot="${s}" style="grid-row:${s + 2};grid-column:${d + 2}"></div>`);
+    for (const d of days) {
+      g.insertAdjacentHTML('beforeend', `<div class="cell" data-day="${d}" data-slot="${s}" style="grid-row:${s + 2};grid-column:${col(d)}"></div>`);
     }
   }
   for (const e of draft.entries) {
+    if (!days.includes(e.day)) continue;
     const b = document.createElement('div');
     b.className = 'block';
     b.classList.toggle('editing', editingEntry === e);
-    b.style.gridColumn = e.day + 2;
+    b.style.gridColumn = col(e.day);
     b.style.gridRow = `${e.start + 2} / ${e.end + 2}`;
     b.style.setProperty('--c', draft.color);
     b.innerHTML = '<strong></strong><span></span>';
     b.querySelector('strong').textContent = e.name;
     b.querySelector('span').textContent = `${rangeText(e)}${e.room ? ' · ' + e.room : ''}`;
-    b.onclick = () => openEntryForm(e);
+    b.onclick = () => { tapStart = null; openEntryForm(e); };
     g.append(b);
   }
   paintSel();
+  renderDayTabs();
+  setHint();
 }
 
 function paintSel() {
@@ -226,7 +289,7 @@ function finishSelection() {
   const start = Math.min(sel.a, sel.b);
   const end = Math.max(sel.a, sel.b) + 1;
   const clash = draft.entries.some((e) => e.day === sel.day && e.start < end && start < e.end);
-  if (clash) { sel = null; paintSel(); return; }
+  if (clash) { sel = null; paintSel(); setHint('Seçtiğin saatlerde zaten bir ders var.'); return; }
   sel = { day: sel.day, a: start, b: end - 1 };
   openEntryForm(null);
 }
@@ -247,6 +310,7 @@ function openEntryForm(entry) {
 
 function closeEntryForm() {
   sel = null;
+  tapStart = null;
   editingEntry = null;
   $('entry-form').hidden = true;
   if (draft) renderWeek();
@@ -301,8 +365,22 @@ document.querySelectorAll('.mode').forEach((btn) => {
   };
 });
 
-$('prev-month').onclick = () => { viewMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() - 1, 1); renderMonth(); };
-$('next-month').onclick = () => { viewMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 1); renderMonth(); };
+const shiftMonth = (n) => { viewMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() + n, 1); renderMonth(); };
+$('prev-month').onclick = () => shiftMonth(-1);
+$('next-month').onclick = () => shiftMonth(1);
+
+// Telefonda takvimi sağa/sola kaydırınca ay değişir
+let touchStart = null;
+$('month-grid').addEventListener('touchstart', (e) => { touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }, { passive: true });
+$('month-grid').addEventListener('touchend', (e) => {
+  if (!touchStart) return;
+  const dx = e.changedTouches[0].clientX - touchStart.x;
+  const dy = e.changedTouches[0].clientY - touchStart.y;
+  touchStart = null;
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) shiftMonth(dx < 0 ? 1 : -1);
+});
+
+mobileQuery.addEventListener('change', () => { if (draft) { tapStart = null; closeEntryForm(); } });
 $('today').onclick = () => { viewMonth = startOfMonth(new Date()); selectedDay = nearestWeekday(new Date()); renderCalendar(); };
 
 $('add-program').onclick = () => openEditor(null);
@@ -314,6 +392,8 @@ $('program-color').oninput = () => { draft.color = $('program-color').value; ren
 
 const week = $('week-grid');
 week.addEventListener('pointerdown', (e) => {
+  lastPointer = e.pointerType;
+  if (e.pointerType === 'touch') return; // dokunmatikte seçim iki dokunuşla (click) yapılır
   const c = e.target.closest('.cell');
   if (!c) return;
   e.preventDefault();
@@ -330,6 +410,25 @@ week.addEventListener('pointerover', (e) => {
   if (!c || +c.dataset.day !== sel.day) return;
   sel.b = +c.dataset.slot;
   paintSel();
+});
+week.addEventListener('click', (e) => {
+  if (lastPointer !== 'touch') return;
+  const c = e.target.closest('.cell');
+  if (!c) return;
+  const day = +c.dataset.day;
+  const s = +c.dataset.slot;
+  if (!tapStart || tapStart.day !== day) { // ilk dokunuş: başlangıç
+    editingEntry = null;
+    $('entry-form').hidden = true;
+    tapStart = { day, s };
+    sel = { day, a: s, b: s };
+    renderWeek();
+    return;
+  }
+  sel = { day, a: tapStart.s, b: s }; // ikinci dokunuş: bitiş
+  tapStart = null;
+  setHint();
+  finishSelection();
 });
 window.addEventListener('pointerup', () => {
   if (!dragging) return;
