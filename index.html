@@ -18,7 +18,7 @@
   <main id="ders-mode" class="layout">
     <aside class="sidebar">
       <h2>Ders programları</h2>
-      <ul id="program-list"></ul>
+      <ul id="program-list" class="item-list"></ul>
       <p id="empty-programs" class="muted">Henüz ders programı yok.</p>
       <button id="add-program" class="btn primary"><span class="long">+ Ders programı ekle</span><span class="short">+ Ekle</span></button>
     </aside>
@@ -40,8 +40,31 @@
     </section>
   </main>
 
-  <main id="sinav-mode" class="placeholder" hidden>
-    <p>Sınav programı modu yakında.</p>
+  <main id="sinav-mode" class="layout" hidden>
+    <aside class="sidebar">
+      <h2>Dersler</h2>
+      <div class="row toggles">
+        <button id="ex-all" class="btn small">Tümünü seç</button>
+        <button id="ex-none" class="btn small">Temizle</button>
+      </div>
+      <ul id="exam-course-list" class="item-list"></ul>
+    </aside>
+
+    <section class="content">
+      <div class="month-head">
+        <button id="ex-prev" class="btn icon" aria-label="Önceki ay">‹</button>
+        <h2 id="ex-month-title"></h2>
+        <button id="ex-next" class="btn icon" aria-label="Sonraki ay">›</button>
+        <button id="ex-today" class="btn">Bugün</button>
+      </div>
+      <div id="ex-month-grid" class="month-grid"></div>
+      <div class="day-view">
+        <h3 id="ex-day-title"></h3>
+        <p id="ex-day-empty" class="muted" hidden></p>
+        <ul id="ex-day-list" class="day-list always"></ul>
+      </div>
+      <p id="ex-source" class="muted source"></p>
+    </section>
   </main>
 
   <div id="editor" class="overlay" hidden>
@@ -74,6 +97,7 @@
   </div>
 
   <script src="programlar.js"></script>
+  <script src="sinavlar.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

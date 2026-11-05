@@ -4,12 +4,16 @@ const FIRST_SLOT = { h: 9, m: 30 }; // ilk dersin başlangıcı
 const SLOT_COUNT = 10;              // 09:30, 10:30 … 18:30
 const SLOT_MINUTES = 50;            // bir ders saatinin süresi
 
-const DAYS = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma'];
+const ALL_DAYS = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
+const ALL_SHORT = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+const DAYS = ALL_DAYS.slice(0, 5);
 const MONTHS = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
 const PALETTE = ['#2563eb', '#16a34a', '#dc2626', '#9333ea', '#ea580c', '#0891b2', '#ca8a04', '#db2777'];
 const STORE_KEY = 'ep.programs';
 const SEL_KEY = 'ep.selected';
 const SEEN_KEY = 'ep.hazirEklenen'; // eklenmiş hazır programların id'leri
+const MODE_KEY = 'ep.mod';
+const EXAM_HIDDEN_KEY = 'ep.sinavGizli'; // sınav modunda gizlenen ders kodları
 const MAX_CHIPS = 3;
 const MAX_DOTS = 6;
 const SHORT_DAYS = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum'];
@@ -118,37 +122,40 @@ function renderSidebar() {
   }
 }
 
-// ---------------- Aylık takvim ----------------
-function renderMonth() {
-  $('month-title').textContent = `${MONTHS[viewMonth.getMonth()]} ${viewMonth.getFullYear()}`;
-  const grid = $('month-grid');
+// ---------------- Aylık takvim (iki mod da kullanır) ----------------
+// eventsOf(gün) → [{ color, label, title }]; cols: haftada kaç gün (5 = Pzt–Cum, 6 = Pzt–Cmt)
+function buildMonth({ grid, titleEl, month, cols, selectedDay: sel, eventsOf, onPick }) {
+  titleEl.textContent = `${MONTHS[month.getMonth()]} ${month.getFullYear()}`;
   grid.innerHTML = '';
-  DAYS.forEach((d, i) => grid.insertAdjacentHTML('beforeend', `<div class="dow"><span class="long">${d}</span><span class="short">${SHORT_DAYS[i]}</span></div>`));
+  grid.style.setProperty('--cols', cols);
+  for (let i = 0; i < cols; i++) {
+    grid.insertAdjacentHTML('beforeend', `<div class="dow"><span class="long">${ALL_DAYS[i]}</span><span class="short">${ALL_SHORT[i]}</span></div>`);
+  }
 
-  const start = new Date(viewMonth);
-  start.setDate(1 - weekdayIndex(viewMonth));
-  if (weekdayIndex(viewMonth) > 4) start.setDate(start.getDate() + 7); // ay hafta sonu başlıyorsa
-  const last = new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 0);
+  const start = new Date(month);
+  start.setDate(1 - weekdayIndex(month));
+  if (weekdayIndex(month) >= cols) start.setDate(start.getDate() + 7); // ay gösterilmeyen bir günde başlıyorsa
+  const last = new Date(month.getFullYear(), month.getMonth() + 1, 0);
   const today = new Date();
 
   for (const week = new Date(start); week <= last; week.setDate(week.getDate() + 7)) {
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < cols; i++) {
       const day = new Date(week);
       day.setDate(week.getDate() + i);
       const cell = document.createElement('button');
       cell.className = 'day-cell';
-      cell.classList.toggle('other', day.getMonth() !== viewMonth.getMonth());
+      cell.classList.toggle('other', day.getMonth() !== month.getMonth());
       cell.classList.toggle('today', sameDay(day, today));
-      cell.classList.toggle('selected', sameDay(day, selectedDay));
+      cell.classList.toggle('selected', sameDay(day, sel));
       cell.innerHTML = `<span class="date-num">${day.getDate()}</span>`;
 
-      const evs = eventsFor(day);
+      const evs = eventsOf(day);
       for (const e of evs.slice(0, MAX_CHIPS)) {
         const chip = document.createElement('span');
         chip.className = 'chip';
-        chip.style.setProperty('--c', e.program.color);
-        chip.textContent = `${slotStart(e.start)} ${e.name}`;
-        chip.title = info(e.name, rangeText(e), e.room, e.teacher, e.program.name);
+        chip.style.setProperty('--c', e.color);
+        chip.textContent = e.label;
+        chip.title = e.title;
         cell.append(chip);
       }
       if (evs.length > MAX_CHIPS) cell.insertAdjacentHTML('beforeend', `<span class="more">+${evs.length - MAX_CHIPS} daha</span>`);
@@ -157,16 +164,28 @@ function renderMonth() {
         dots.className = 'dots';
         for (const e of evs.slice(0, MAX_DOTS)) {
           const dot = document.createElement('i');
-          dot.style.background = e.program.color;
+          dot.style.background = e.color;
           dots.append(dot);
         }
         cell.append(dots);
       }
 
-      cell.onclick = () => { selectedDay = day; renderCalendar(); };
+      cell.onclick = () => onPick(day);
       grid.append(cell);
     }
   }
+}
+
+function renderMonth() {
+  buildMonth({
+    grid: $('month-grid'), titleEl: $('month-title'), month: viewMonth, cols: 5, selectedDay,
+    eventsOf: (day) => eventsFor(day).map((e) => ({
+      color: e.program.color,
+      label: `${slotStart(e.start)} ${e.name}`,
+      title: info(e.name, rangeText(e), e.room, e.teacher, e.program.name),
+    })),
+    onPick: (day) => { selectedDay = day; renderCalendar(); },
+  });
 }
 
 // ---------------- Seçilen günün saatlik programı ----------------
@@ -395,28 +414,31 @@ function deleteDraft() {
 }
 
 // ---------------- Olaylar ----------------
-document.querySelectorAll('.mode').forEach((btn) => {
-  btn.onclick = () => {
-    document.querySelectorAll('.mode').forEach((x) => x.classList.toggle('active', x === btn));
-    $('ders-mode').hidden = btn.dataset.mode !== 'ders';
-    $('sinav-mode').hidden = btn.dataset.mode !== 'sinav';
-  };
-});
+function setMode(mode) {
+  document.querySelectorAll('.mode').forEach((x) => x.classList.toggle('active', x.dataset.mode === mode));
+  $('ders-mode').hidden = mode !== 'ders';
+  $('sinav-mode').hidden = mode !== 'sinav';
+  store(MODE_KEY, mode);
+}
+document.querySelectorAll('.mode').forEach((btn) => { btn.onclick = () => setMode(btn.dataset.mode); });
 
 const shiftMonth = (n) => { viewMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() + n, 1); renderMonth(); };
 $('prev-month').onclick = () => shiftMonth(-1);
 $('next-month').onclick = () => shiftMonth(1);
 
 // Telefonda takvimi sağa/sola kaydırınca ay değişir
-let touchStart = null;
-$('month-grid').addEventListener('touchstart', (e) => { touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }, { passive: true });
-$('month-grid').addEventListener('touchend', (e) => {
-  if (!touchStart) return;
-  const dx = e.changedTouches[0].clientX - touchStart.x;
-  const dy = e.changedTouches[0].clientY - touchStart.y;
-  touchStart = null;
-  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) shiftMonth(dx < 0 ? 1 : -1);
-});
+function onSwipe(el, fn) {
+  let touchStart = null;
+  el.addEventListener('touchstart', (e) => { touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }, { passive: true });
+  el.addEventListener('touchend', (e) => {
+    if (!touchStart) return;
+    const dx = e.changedTouches[0].clientX - touchStart.x;
+    const dy = e.changedTouches[0].clientY - touchStart.y;
+    touchStart = null;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) fn(dx < 0 ? 1 : -1);
+  });
+}
+onSwipe($('month-grid'), shiftMonth);
 
 mobileQuery.addEventListener('change', () => { if (draft) { tapStart = null; closeEntryForm(); } });
 $('today').onclick = () => { viewMonth = startOfMonth(new Date()); selectedDay = nearestWeekday(new Date()); renderCalendar(); };
@@ -495,5 +517,127 @@ document.addEventListener('keydown', (e) => {
   if (!$('entry-form').hidden) closeEntryForm(); else closeEditor();
 });
 
+// ================= Sınav programı modu =================
+// Veri sinavlar.js'den gelir (araclar/sinavlari-guncelle.js ile üretilir).
+const EXAMS = window.SINAVLAR || [];
+const EXAM_COURSES = window.SINAV_DERSLER || [];
+const EXAM_PALETTE = ['#2563eb', '#16a34a', '#dc2626', '#9333ea', '#ea580c', '#0891b2', '#ca8a04', '#db2777', '#4f46e5', '#0d9488', '#be123c', '#65a30d', '#7c3aed', '#c2410c', '#0369a1', '#a21caf'];
+const examColor = new Map(EXAM_COURSES.map(([code], i) => [code, EXAM_PALETTE[i % EXAM_PALETTE.length]]));
+const isoDate = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const fromIso = (s) => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+const examTime = (e) => (e.start ? `${e.start}–${e.end}` : 'Saat belirtilmemiş');
+const EXAM_COLS = EXAMS.some((e) => fromIso(e.date).getDay() === 0) ? 7 : 6; // pazar sınavı yoksa Pzt–Cmt
+
+let hiddenCourses = new Set(load(EXAM_HIDDEN_KEY, []));
+let exViewMonth = startOfMonth(new Date());
+let exSelectedDay = (() => { // bugün gösterilmeyen bir günse sonraki pazartesi
+  const d = new Date(); d.setHours(0, 0, 0, 0);
+  while (weekdayIndex(d) >= EXAM_COLS) d.setDate(d.getDate() + 1);
+  return d;
+})();
+
+const examsOn = (day) => { const k = isoDate(day); return EXAMS.filter((e) => e.date === k && !hiddenCourses.has(e.code)); };
+
+function renderExamSidebar() {
+  const ul = $('exam-course-list');
+  ul.innerHTML = '';
+  for (const [code, name] of EXAM_COURSES) {
+    const li = document.createElement('li');
+    li.className = 'program-item noedit';
+    li.style.setProperty('--c', examColor.get(code));
+    li.innerHTML = '<label><input type="checkbox"><span class="swatch"></span><span class="pname"></span><small class="code"></small></label>';
+    const cb = li.querySelector('input');
+    cb.checked = !hiddenCourses.has(code);
+    cb.onchange = () => {
+      if (cb.checked) hiddenCourses.delete(code); else hiddenCourses.add(code);
+      store(EXAM_HIDDEN_KEY, [...hiddenCourses]);
+      renderExams();
+    };
+    li.querySelector('.swatch').style.background = examColor.get(code);
+    li.querySelector('.pname').textContent = name;
+    li.querySelector('.code').textContent = code;
+    li.querySelector('label').title = `${name} (${code})`;
+    ul.append(li);
+  }
+}
+
+function examItem(e) {
+  const li = document.createElement('li');
+  li.style.setProperty('--c', examColor.get(e.code));
+  li.innerHTML = '<span class="t"></span><div><strong></strong><span class="sub"></span></div>';
+  li.querySelector('.t').innerHTML = e.start ? `${e.start}<br>${e.end}` : 'Saat<br>yok';
+  li.querySelector('strong').textContent = e.course;
+  li.querySelector('.sub').textContent = info(e.code, e.title, e.sections && `Şube ${e.sections}`);
+  const div = li.querySelector('div');
+  for (const r of e.rooms) {
+    const line = document.createElement('span');
+    line.textContent = e.rooms.length > 1 && r.sections ? `Şube ${r.sections}: ${r.rooms}` : `Derslik: ${r.rooms}`;
+    div.append(line);
+  }
+  return li;
+}
+
+function renderExams() {
+  buildMonth({
+    grid: $('ex-month-grid'), titleEl: $('ex-month-title'), month: exViewMonth, cols: EXAM_COLS, selectedDay: exSelectedDay,
+    eventsOf: (day) => examsOn(day).map((e) => ({
+      color: examColor.get(e.code),
+      label: `${e.start || ''} ${e.code}`.trim(),
+      title: info(e.course, e.title, examTime(e)),
+    })),
+    onPick: (day) => { exSelectedDay = day; renderExams(); },
+  });
+
+  $('ex-day-title').textContent = exSelectedDay.toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const list = $('ex-day-list');
+  list.innerHTML = '';
+  const evs = examsOn(exSelectedDay);
+  for (const e of evs) list.append(examItem(e));
+
+  // Boş günde sıradaki sınava atlama düğmesi
+  const empty = $('ex-day-empty');
+  empty.hidden = evs.length > 0;
+  empty.innerHTML = '';
+  if (!evs.length) {
+    const key = isoDate(exSelectedDay);
+    const next = EXAMS.find((e) => e.date > key && !hiddenCourses.has(e.code));
+    empty.append('Bu gün sınav yok.');
+    if (next) {
+      const b = document.createElement('button');
+      b.className = 'link';
+      b.textContent = `Sıradaki: ${fromIso(next.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', weekday: 'long' })} · ${next.course}`;
+      b.onclick = () => { exSelectedDay = fromIso(next.date); exViewMonth = startOfMonth(exSelectedDay); renderExams(); };
+      empty.append(' ', b);
+    }
+  }
+}
+
+function setAllCourses(visible) {
+  hiddenCourses = new Set(visible ? [] : EXAM_COURSES.map(([c]) => c));
+  store(EXAM_HIDDEN_KEY, [...hiddenCourses]);
+  renderExamSidebar();
+  renderExams();
+}
+$('ex-all').onclick = () => setAllCourses(true);
+$('ex-none').onclick = () => setAllCourses(false);
+const shiftExamMonth = (n) => { exViewMonth = new Date(exViewMonth.getFullYear(), exViewMonth.getMonth() + n, 1); renderExams(); };
+$('ex-prev').onclick = () => shiftExamMonth(-1);
+$('ex-next').onclick = () => shiftExamMonth(1);
+$('ex-today').onclick = () => { exViewMonth = startOfMonth(new Date()); exSelectedDay = new Date(new Date().setHours(0, 0, 0, 0)); renderExams(); };
+onSwipe($('ex-month-grid'), shiftExamMonth);
+
+const missing = window.SINAV_BULUNAMAYAN || [];
+$('ex-source').innerHTML = '';
+if (missing.length) $('ex-source').append(`Sınavı bulunamayan dersler: ${missing.join(', ')}. `);
+if (window.SINAV_KAYNAK) {
+  const a = document.createElement('a');
+  a.href = window.SINAV_KAYNAK; a.target = '_blank'; a.rel = 'noopener';
+  a.textContent = 'Kaynak: Atılım arasınav programı';
+  $('ex-source').append(a);
+}
+
 renderSidebar();
 renderCalendar();
+renderExamSidebar();
+renderExams();
+setMode(load(MODE_KEY, 'ders') === 'sinav' ? 'sinav' : 'ders');
