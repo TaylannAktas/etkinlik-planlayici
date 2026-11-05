@@ -16,6 +16,7 @@ const DERSLER = [
   ['ENG101', 'Akademik İngilizce I'],
   ['CMPE109', 'Hesaplamanın Temelleri'],
   ['MATH151', 'Kalkülüs I'],
+  ['MATH152', 'Kalkülüs II'],
   ['CHE105', 'Genel Kimya'],
   ['MATH275', 'Lineer Cebir'],
   ['ENG201', 'Akademik İngilizce III'],

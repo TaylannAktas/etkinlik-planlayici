@@ -734,6 +734,42 @@ $('exam-editor').onclick = (ev) => { if (ev.target.id === 'exam-editor') closeEx
 document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && !$('exam-editor').hidden) closeExamForm(); });
 $('add-exam').onclick = () => openExamForm(null);
 
+// ---- Sınav arama ----
+// Türkçe harfler ve boşluklar yok sayılır; "II" gibi Roma rakamları sayıya çevrilir (kalkülüs 2 → Kalkülüs II).
+const fold = (s) => (s || '')
+  .replace(/\bIII\b/gi, '3').replace(/\bII\b/gi, '2').replace(/\bI\b/gi, '1')
+  .toLocaleLowerCase('tr').replace(/[çğıöşü]/g, (c) => ({ ç: 'c', ğ: 'g', ı: 'i', ö: 'o', ş: 's', ü: 'u' })[c])
+  .replace(/[^a-z0-9]/g, '');
+function renderSearch() {
+  const q = fold($('ex-search').value);
+  const ul = $('ex-search-results');
+  ul.innerHTML = '';
+  ul.hidden = !q;
+  if (!q) return;
+  const hits = EXAMS.filter((e) => fold(`${e.code} ${e.course} ${e.title}`).includes(q));
+  if (!hits.length) { ul.innerHTML = '<li class="none">Eşleşen sınav yok.</li>'; return; }
+  for (const e of hits) {
+    const li = document.createElement('li');
+    li.innerHTML = '<button type="button"><span class="d"></span><span class="c"></span><span class="m"></span></button>';
+    li.querySelector('.d').textContent = fromIso(e.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', weekday: 'short' });
+    li.querySelector('.c').textContent = info(e.code, e.course, e.title);
+    li.querySelector('.m').textContent = examTime(e);
+    li.querySelector('button').onclick = () => {
+      if (hiddenCourses.has(e.code)) { hiddenCourses.delete(e.code); store(EXAM_HIDDEN_KEY, [...hiddenCourses]); renderExamSidebar(); }
+      exSelectedDay = fromIso(e.date); exViewMonth = startOfMonth(exSelectedDay);
+      $('ex-search').value = ''; renderSearch();
+      renderAll();
+      $('ex-day-title').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    ul.append(li);
+  }
+}
+$('ex-search').oninput = renderSearch;
+$('ex-search').onkeydown = (ev) => {
+  if (ev.key === 'Escape') { $('ex-search').value = ''; renderSearch(); }
+  if (ev.key === 'Enter') { const b = $('ex-search-results').querySelector('button'); if (b) b.click(); }
+};
+
 const missing = window.SINAV_BULUNAMAYAN || [];
 $('ex-source').innerHTML = '';
 if (missing.length) $('ex-source').append(`Sınavı bulunamayan dersler: ${missing.join(', ')}. `);

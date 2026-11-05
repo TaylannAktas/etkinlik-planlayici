@@ -4,7 +4,7 @@ Birden fazla bölümün haftalık ders programını tek bir aylık takvimde gör
 
 - **Ders Programı modu:** Sol menüden bir ya da birden fazla ders programı seçilir; dersler sağdaki aylık takvimde (Pazartesi–Cuma) küçük etkinlikler olarak görünür. Takvimde bir güne tıklayınca o günün saatlik programı altta açılır.
 - **Program ekleme/düzenleme:** "Ders programı ekle" ile boş bir haftalık takvim açılır. Bir gün sütununda saatleri sürükleyerek seçip ders adını (ve isteğe bağlı derslik) yazarsın, en sonda **Kaydet**. Kayıtlı programlar "Düzenle" ile değiştirilebilir ya da silinebilir.
-- **Sınav Programı modu:** Takip edilen derslerin arasınavları Pazartesi–Cumartesi aylık takvimde görünür; güne tıklayınca saat, şube ve derslikler listelenir. Soldan ders seçilip gizlenebilir. Listede olmayan bir sınav **"+ Sınav ekle"** ile elle eklenir (ders kodu, tarih, isteğe bağlı saat/derslik); elle eklenenler gün listesinde "Düzenle" ile değiştirilip silinebilir ve diğer veriler gibi tarayıcıda tutulur.
+- **Sınav Programı modu:** Takip edilen derslerin arasınavları Pazartesi–Cumartesi aylık takvimde görünür; güne tıklayınca saat, şube ve derslikler listelenir. Soldan ders seçilip gizlenebilir. Takvimin üstündeki arama kutusu ders kodu, Türkçe/İngilizce ad ya da "kalkülüs 2" gibi yazımlarla sınavı bulur; sonuca tıklayınca o güne gidilir. Listede olmayan bir sınav **"+ Sınav ekle"** ile elle eklenir (ders kodu, tarih, isteğe bağlı saat/derslik); elle eklenenler gün listesinde "Düzenle" ile değiştirilip silinebilir ve diğer veriler gibi tarayıcıda tutulur.
 
 ## Çalıştırma
 

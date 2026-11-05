@@ -1,7 +1,7 @@
 // Bu dosya araclar/sinavlari-guncelle.js ile üretildi; elle düzenleme yerine script'i çalıştır.
 // Kaynak: https://dersprogramiyukle.atilim.edu.tr/20262027guzarasinav/{muh,servis,fef,isletme}  ·  Güncelleme: 2026-11-05
 window.SINAV_KAYNAK = "https://dersprogramiyukle.atilim.edu.tr/20262027guzarasinav/muh/";
-window.SINAV_DERSLER = [["CMPE113","Bilgisayar Programlama I"],["HIST101","Atatürk İlkeleri ve İnkılâp Tarihi I"],["HIST111","Atatürk İlkeleri ve İnkılâp Tarihi I (İng.)"],["PHYS101","Genel Fizik I"],["ENG101","Akademik İngilizce I"],["CMPE109","Hesaplamanın Temelleri"],["MATH151","Kalkülüs I"],["CHE105","Genel Kimya"],["MATH275","Lineer Cebir"],["ENG201","Akademik İngilizce III"],["ISE261","İş ve e-Ticaret"],["CMPE251","Ayrık Hesaplamalı Yapılar"],["CMPE225","Nesne Tabanlı Programlama"],["SE221","Yazılım Gereksinim Mühendisliği"],["EE203","Sayısal Devreler"],["HIST201","Uygarlık Tarihi"],["HIST221","Uygarlık Tarihi (İng.)"],["EE103","Elektrik ve Elektronik Mühendisliğine Giriş"],["MATH276","Diferansiyel Denklemler"],["EE209","Devre Analizi I"],["EE213","Olasılık ve Rastgele Süreçler"]];
+window.SINAV_DERSLER = [["CMPE113","Bilgisayar Programlama I"],["HIST101","Atatürk İlkeleri ve İnkılâp Tarihi I"],["HIST111","Atatürk İlkeleri ve İnkılâp Tarihi I (İng.)"],["PHYS101","Genel Fizik I"],["ENG101","Akademik İngilizce I"],["CMPE109","Hesaplamanın Temelleri"],["MATH151","Kalkülüs I"],["MATH152","Kalkülüs II"],["CHE105","Genel Kimya"],["MATH275","Lineer Cebir"],["ENG201","Akademik İngilizce III"],["ISE261","İş ve e-Ticaret"],["CMPE251","Ayrık Hesaplamalı Yapılar"],["CMPE225","Nesne Tabanlı Programlama"],["SE221","Yazılım Gereksinim Mühendisliği"],["EE203","Sayısal Devreler"],["HIST201","Uygarlık Tarihi"],["HIST221","Uygarlık Tarihi (İng.)"],["EE103","Elektrik ve Elektronik Mühendisliğine Giriş"],["MATH276","Diferansiyel Denklemler"],["EE209","Devre Analizi I"],["EE213","Olasılık ve Rastgele Süreçler"]];
 window.SINAV_BULUNAMAYAN = ["Kariyer Planlama","Üniversite Hayatına Giriş"];
 window.SINAVLAR = [
  {
@@ -16,6 +16,21 @@ window.SINAVLAR = [
    {
     "sections": "01",
     "rooms": "B1012, B1003"
+   }
+  ]
+ },
+ {
+  "code": "MATH152",
+  "course": "Kalkülüs II",
+  "title": "Calculus II 1.midterm",
+  "date": "2026-10-22",
+  "start": "17:30",
+  "end": "19:30",
+  "sections": "01–03",
+  "rooms": [
+   {
+    "sections": "01–03",
+    "rooms": "1024, 1029, B1006, B1008, B1010, B1012, B1014, B1037"
    }
   ]
  },
@@ -424,6 +439,21 @@ window.SINAVLAR = [
   "course": "Diferansiyel Denklemler",
   "title": "Differential Equations 2.midterm",
   "date": "2026-12-01",
+  "start": "17:30",
+  "end": "19:30",
+  "sections": "01–03",
+  "rooms": [
+   {
+    "sections": "01–03",
+    "rooms": "1024, 1029, B1006, B1008, B1010, B1012, B1014, B1037"
+   }
+  ]
+ },
+ {
+  "code": "MATH152",
+  "course": "Kalkülüs II",
+  "title": "Calculus II 2.midterm",
+  "date": "2026-12-03",
   "start": "17:30",
   "end": "19:30",
   "sections": "01–03",
