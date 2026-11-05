@@ -150,4 +150,147 @@ window.HAZIR_PROGRAMLAR = [
       ders('Cum', 1, 3, 'EE213-SEC-01', 'Müh. 1029', 'Reşat Özgür Doruk'),
     ],
   },
+  {
+    id: 'hazir-se-1-reg',
+    name: 'SE 1 Reg.',
+    color: '#db2777',
+    entries: [
+      // Pazartesi
+      ders('Pzt', 1, 2, 'CHE105-SEC-01', 'Müh. 1003', 'Seniz Ozalp Yaman'),
+      ders('Pzt', 1, 2, 'CHE105-SEC-02', 'Müh. 2015', 'Atilla Cihaner'),
+      ders('Pzt', 1, 2, 'CHE105-SEC-03', 'Müh. 2015', 'Salih Ertan'),
+      ders('Pzt', 1, 2, 'CHE105-SEC-04', 'Müh. 2015', 'Murat Kaya'),
+      ders('Pzt', 3, 4, 'CMPE109-SEC-02', 'Müh. B1008', 'Gökçen Tonbul'),
+      ders('Pzt', 4, 4, 'CMPE109-SEC-01', 'Müh.Lab.LAB Z1030'),
+      ders('Pzt', 4, 4, 'CMPE109-SEC-01', 'Müh.Lab.L 3013'),
+      ders('Pzt', 5, 6, 'PHYS101-SEC-02', 'Müh. 2031', 'Staff'),
+      ders('Pzt', 7, 8, 'ENG101-SEC-04', 'Müh. 2023', 'Staff'),
+      // Salı
+      ders('Sal', 1, 2, 'CMPE113-SEC-02', 'Müh. 2017', 'Ali Yazıcı'),
+      ders('Sal', 3, 3, 'CHE105-SEC-01', 'Müh. 1003', 'Seniz Ozalp Yaman'),
+      ders('Sal', 3, 3, 'CHE105-SEC-02', 'Müh. 2015', 'Atilla Cihaner'),
+      ders('Sal', 3, 3, 'CHE105-SEC-03', 'Müh. 2015', 'Salih Ertan'),
+      ders('Sal', 3, 3, 'CHE105-SEC-04', 'Müh. 2015', 'Murat Kaya'),
+      ders('Sal', 4, 4, 'CMPE109-SEC-02', 'Müh.Lab.LAB Z1030', 'Gökçen Tonbul'),
+      ders('Sal', 5, 6, 'MATH151-SEC-01', 'Müh. B1008', 'Fatma Güler Eroğlu'),
+      ders('Sal', 7, 9, 'CHE105-SEC-02', 'Müh.Lab.B3024', 'Atilla Cihaner'),
+      ders('Sal', 7, 9, 'PHYS101-SEC-02', 'Müh.Lab.B2016', 'Staff'),
+      // Çarşamba
+      ders('Çar', 1, 2, 'MATH151-SEC-01', 'Müh. B1008', 'Fatma Güler Eroğlu'),
+      ders('Çar', 3, 3, 'PHYS101-SEC-02', 'Müh. 2043', 'Staff'),
+      ders('Çar', 4, 6, 'CHE105-SEC-01', 'Müh.Lab.B3024', 'Seniz Ozalp Yaman'),
+      // Perşembe
+      ders('Per', 1, 2, 'HIST101-SEC-08', 'UZAKTAN', 'Gunseli Gumusel'),
+      ders('Per', 1, 2, 'ENG101-SEC-04', 'Müh. 2023', 'Staff'),
+      ders('Per', 3, 4, 'CMPE109-SEC-01', 'Müh. B1014', 'Gökçen Tonbul'),
+      ders('Per', 5, 6, 'CMPE113-SEC-02', 'Müh.Lab.L 3009', 'Ali Yazıcı'),
+      ders('Per', 5, 6, 'CMPE113-SEC-02', 'Müh.Lab.L 3013', 'Ali Yazıcı'),
+      ders('Per', 7, 8, 'HIST111-SEC-01', 'UZAKTAN', 'Gunseli Gumusel'),
+      ders('Per', 7, 9, 'CHE105-SEC-04', 'Müh.Lab.B3024', 'Murat Kaya'),
+      // Cuma
+      ders('Cum', 1, 2, 'MATH151-SEC-01', 'Müh. B1010', 'Fatma Güler Eroğlu'),
+      ders('Cum', 7, 9, 'CHE105-SEC-03', 'Müh.Lab.B3024', 'Salih Ertan'),
+    ],
+  },
+  {
+    id: 'hazir-se-2-reg',
+    name: 'SE 2 Reg.',
+    color: '#ca8a04',
+    entries: [
+      // Pazartesi
+      ders('Pzt', 1, 3, 'CMPE225-SEC-02', 'Müh. 2035', 'Erhan Gokcay'),
+      ders('Pzt', 5, 6, 'MATH275-SEC-02', 'Müh. B1014', 'Fatih Sulak'),
+      ders('Pzt', 7, 8, 'MATH275-SEC-01', 'Müh. 1029', 'Burcu Gulmez Temur'),
+      // Salı
+      ders('Sal', 1, 3, 'SE221-SEC-01', 'Müh. 1025', 'Aylin Akça Okan'),
+      ders('Sal', 5, 7, 'TURK201-SEC-03', 'İşletme Z09 RB', 'Gokce Ulus'),
+      ders('Sal', 5, 7, 'CMPE251-SEC-04', 'Müh. B1003', 'Davut Culha'),
+      // Çarşamba
+      ders('Çar', 1, 2, 'MATH275-SEC-02', 'Müh. 1029', 'Fatih Sulak'),
+      ders('Çar', 3, 4, 'MATH275-SEC-01', 'Müh. 1029', 'Burcu Gulmez Temur'),
+      ders('Çar', 6, 8, 'ENG201-SEC-04', 'Müh. 2027', 'Staff'),
+      // Perşembe
+      ders('Per', 1, 3, 'CMPE251-SEC-02', 'Müh. 1025', 'Güzin Türkmen'),
+      ders('Per', 4, 6, 'ENG201-SEC-05', 'Müh. 1025', 'Staff'),
+      ders('Per', 6, 8, 'TURK201-SEC-02', 'İşletme Z09 RB', 'Staff'),
+      ders('Per', 7, 8, 'CMPE225-SEC-02', 'Müh.Lab.L 3009', 'Erhan Gokcay'),
+      ders('Per', 7, 8, 'CMPE225-SEC-02', 'Müh.Lab.L 3013', 'Erhan Gokcay'),
+      // Cuma
+      ders('Cum', 1, 3, 'CMPE226-SEC-02', 'Müh. B1008', 'Tuncay Terzioğlu'),
+    ],
+  },
+  {
+    id: 'hazir-ise-1-reg',
+    name: 'ISE 1 Reg.',
+    color: '#2563eb',
+    entries: [
+      // Pazartesi
+      ders('Pzt', 1, 2, 'CHE105-SEC-01', 'Müh. 1003', 'Seniz Ozalp Yaman'),
+      ders('Pzt', 1, 2, 'CHE105-SEC-02', 'Müh. 2015', 'Atilla Cihaner'),
+      ders('Pzt', 1, 2, 'CHE105-SEC-03', 'Müh. 2015', 'Salih Ertan'),
+      ders('Pzt', 1, 2, 'CHE105-SEC-04', 'Müh. 2015', 'Murat Kaya'),
+      ders('Pzt', 3, 4, 'CMPE109-SEC-02', 'Müh. B1008', 'Gökçen Tonbul'),
+      ders('Pzt', 5, 6, 'PHYS101-SEC-02', 'Müh. 2031', 'Staff'),
+      ders('Pzt', 7, 8, 'CMPE113-SEC-01', 'Müh. 2017', 'Ali Yazıcı'),
+      // Salı
+      ders('Sal', 1, 2, 'CMPE113-SEC-01', 'Müh.Lab.L 3009', 'Ali Yazıcı'),
+      ders('Sal', 1, 2, 'CMPE113-SEC-01', 'Müh.Lab.L 3013', 'Ali Yazıcı'),
+      ders('Sal', 1, 2, 'CMPE113-SEC-02', 'Müh. 2017', 'Ali Yazıcı'),
+      ders('Sal', 3, 3, 'CHE105-SEC-01', 'Müh. 1003', 'Seniz Ozalp Yaman'),
+      ders('Sal', 3, 3, 'CHE105-SEC-02', 'Müh. 2015', 'Atilla Cihaner'),
+      ders('Sal', 3, 3, 'CHE105-SEC-03', 'Müh. 2015', 'Salih Ertan'),
+      ders('Sal', 3, 3, 'CHE105-SEC-04', 'Müh. 2015', 'Murat Kaya'),
+      ders('Sal', 4, 4, 'CMPE109-SEC-02', 'Müh.Lab.LAB Z1030', 'Gökçen Tonbul'),
+      ders('Sal', 5, 6, 'MATH151-SEC-03', 'Müh. B1010', 'Serdar Ay'),
+      ders('Sal', 7, 9, 'CHE105-SEC-02', 'Müh.Lab.B3024', 'Atilla Cihaner'),
+      ders('Sal', 7, 9, 'PHYS101-SEC-02', 'Müh.Lab.B2016', 'Staff'),
+      // Çarşamba
+      ders('Çar', 1, 2, 'MATH151-SEC-03', 'Müh. B1010', 'Serdar Ay'),
+      ders('Çar', 3, 3, 'PHYS101-SEC-02', 'Müh. 2043', 'Staff'),
+      ders('Çar', 4, 6, 'CHE105-SEC-01', 'Müh.Lab.B3024', 'Seniz Ozalp Yaman'),
+      // Perşembe
+      ders('Per', 1, 2, 'HIST101-SEC-08', 'UZAKTAN', 'Gunseli Gumusel'),
+      ders('Per', 3, 4, 'ENG101-SEC-03', 'Müh. B1017', 'Staff'),
+      ders('Per', 5, 6, 'CMPE113-SEC-02', 'Müh.Lab.L 3009', 'Ali Yazıcı'),
+      ders('Per', 5, 6, 'CMPE113-SEC-02', 'Müh.Lab.L 3013', 'Ali Yazıcı'), // görselde hoca adı açılır kutunun altında kalmış
+      ders('Per', 7, 8, 'HIST111-SEC-01', 'UZAKTAN', 'Gunseli Gumusel'),
+      ders('Per', 7, 9, 'CHE105-SEC-04', 'Müh.Lab.B3024', 'Murat Kaya'),
+      // Cuma
+      ders('Cum', 1, 2, 'ENG101-SEC-03', 'Müh. B1017', 'Staff'),
+      ders('Cum', 5, 7, 'MAN111-SEC-02', 'İşletme 209 IB', 'Mehmet Argun'),
+      ders('Cum', 5, 6, 'MATH151-SEC-03', 'Müh. B1010', 'Serdar Ay'),
+      ders('Cum', 7, 9, 'CHE105-SEC-03', 'Müh.Lab.B3024', 'Salih Ertan'),
+    ],
+  },
+  {
+    id: 'hazir-ise-2-reg',
+    name: 'ISE 2 Reg.',
+    color: '#0d9488',
+    entries: [
+      // Pazartesi
+      ders('Pzt', 1, 3, 'CMPE251-SEC-03', 'Müh. 1026II', 'Davut Culha'),
+      ders('Pzt', 5, 7, 'MAN213-SEC-01', 'İşletme Z13 İB', 'Sule Tuzlukaya'),
+      ders('Pzt', 5, 6, 'MATH275-SEC-02', 'Müh. B1014', 'Fatih Sulak'),
+      ders('Pzt', 7, 8, 'MATH275-SEC-01', 'Müh. 1029', 'Burcu Gulmez Temur'),
+      ders('Pzt', 7, 8, 'MATH275-SEC-03', 'Müh. B1037', 'Ahmet Yaşar Özban'),
+      // Salı
+      ders('Sal', 1, 3, 'ENG201-SEC-03', 'Müh. B1017', 'Staff'),
+      ders('Sal', 5, 7, 'TURK201-SEC-03', 'İşletme Z09 RB', 'Gokce Ulus'),
+      // Çarşamba
+      ders('Çar', 1, 2, 'MATH275-SEC-02', 'Müh. 1029', 'Fatih Sulak'),
+      ders('Çar', 3, 4, 'MATH275-SEC-01', 'Müh. 1029', 'Burcu Gulmez Temur'),
+      ders('Çar', 3, 4, 'MATH275-SEC-03', 'Müh. B1006', 'Ahmet Yaşar Özban'),
+      ders('Çar', 6, 8, 'CMPE251-SEC-05', 'Müh. 1017', 'Davut Culha'),
+      // Perşembe
+      ders('Per', 1, 3, 'CMPE226-SEC-01', 'Müh. 1009', 'Tuncay Terzioğlu'),
+      ders('Per', 1, 3, 'ISE261-SEC-01', 'Müh. 1015', 'Mehtap Tufan'),
+      ders('Per', 4, 6, 'CMPE225-SEC-03', 'Müh. 2017', 'Erhan Gokcay'),
+      ders('Per', 6, 8, 'TURK201-SEC-02', 'İşletme Z09 RB', 'Staff'),
+      // Cuma
+      ders('Cum', 1, 3, 'CMPE226-SEC-02', 'Müh. B1008', 'Tuncay Terzioğlu'),
+      ders('Cum', 1, 3, 'ISE261-SEC-02', 'Müh. 1009', 'Mehtap Tufan'),
+      ders('Cum', 5, 6, 'CMPE225-SEC-03', 'Müh.Lab.L 3017', 'Erhan Gokcay'),
+      ders('Cum', 5, 6, 'CMPE225-SEC-03', 'Müh.Lab.L 3009', 'Erhan Gokcay'),
+    ],
+  },
 ];
